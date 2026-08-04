@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>UltraStar Controller</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <link rel="icon" href="/static/favicon.ico">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
+    </head>
+
+    <body>
+        <h1><img src="/static/favicon.ico">UltraStar Controller</h1>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="search-tab">
+                Search
+            </button>
+
+            <button class="tab-button" data-tab="queue-tab">
+                Queue <span id="queue-count"></span>
+            </button>
+        </div>
+
+        <div class="container">
+
+            <div id="queue-tab" class="tab-panel">
+                <div class="queue-section">
+                    <div class="queue-header">
+                        <h2>Queue</h2>
+
+                        <div class="queue-controls">
+                            <button onclick="clearQueue()" class="song-button">
+                                <i class="fa-solid fa-ban"></i>
+                            </button>
+
+                            <button onclick="playNext()" class="song-button">
+                                <i class="fa-solid fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="queue" class="results"></div>
+                </div>
+            </div>
+
+            <div id="search-tab" class="tab-panel active">
+                <div class="search-section">
+                    <div class="search-controls">
+                        <input
+                               id="search"
+                               type="search"
+                               placeholder="Search songs..."
+                               autocomplete="off"
+                               autofocus>
+
+                        <select id="searchField">
+                            <option value="all">Title + Artist</option>
+                            <option value="title">Title</option>
+                            <option value="artist">Artist</option>
+                        </select>
+                    </div>
+
+                    <label class="checkbox-group">
+                        <input type="checkbox" id="duetsOnly">
+                        Duets only
+                    </label>
+
+                    <div id="searchStatus" class="search-status"></div>
+                </div>
+
+                <hr>
+
+                <div id="results" class="results"></div>
+            </div>
+        </div>
+
+        <script src="{{ url_for('static', filename='app.js') }}"></script>
+    </body>
+
+</html>
