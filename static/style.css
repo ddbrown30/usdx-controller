@@ -266,7 +266,7 @@ h1 img {
     background: linear-gradient(180deg, #202a33, #151b22);
     padding: 5px 3px;
     color: var(--us-muted);
-    font-size: 0.9rem;
+    font-size: 20px;
     line-height: 1.05;
 }
 
