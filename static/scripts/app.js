@@ -195,9 +195,8 @@ function renderQueue(songs) {
     queueElement.innerHTML = "";
 
     if (songs.length === 0) {
-        queueElement.innerHTML =
-            '<div class="no-results">Queue is empty.</div>';
-
+        queueElement.innerHTML ='<div class="no-results">Queue is empty.</div>';
+        updateQueueCount(songs);
         return;
     }
 

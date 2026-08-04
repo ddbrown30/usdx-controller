@@ -11,9 +11,6 @@
     --us-soft: #d6cab7;
     --us-line: rgba(255, 255, 255, 0.1);
     --us-accent: #62c7b2;
-    --us-danger: #e56b65;
-    --us-warn: #d6a34f;
-    --us-good: #7cc36e;
     --us-shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
     --us-radius: 5px;
     --us-tap: 46px;
@@ -220,7 +217,7 @@ h1 img {
 .no-results {
     padding: 30px;
     text-align: center;
-    color: #777;
+    color: var(--us-muted);
 }
 
 .queue-header {
@@ -276,7 +273,7 @@ h1 img {
 .tab-button.active {
     font-weight: bold;
     color: #06231f;
-    background: linear-gradient(180deg, #8be0cf, #62c7b2);
+    background: linear-gradient(180deg, #8be0cf, var(--us-accent));
     border-color: rgba(98, 199, 178, 0.75);
     box-shadow: 0 0 0 1px rgba(98, 199, 178, 0.22), 0 8px 20px rgba(0, 0, 0, 0.22);
 }
