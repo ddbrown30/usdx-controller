@@ -31,8 +31,6 @@ body {
     linear-gradient(180deg, #0e151b, #12161b 48%, #0b0f13);
     color: var(--us-text);
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
 }
 
 .checkbox-group {
@@ -155,8 +153,8 @@ h1 img {
     flex-direction: column;
     gap: 8px;
     overflow-y: auto;
-    flex: 1;
     min-height: 0;
+    max-height: calc(100vh - 210px);
 }
 
 .song {
@@ -225,21 +223,11 @@ h1 img {
     color: #777;
 }
 
-.queue-section {
-    align-self: stretch;
-    width: auto;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-}
-
 .queue-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
-    flex-shrink: 0;
+    margin-bottom: 15px;
 }
 
 @media (max-width: 600px) {
@@ -302,5 +290,4 @@ h1 img {
 .tab-panel.active {
     display: flex;
     flex-direction: column;
-    width: 100%;
 }
