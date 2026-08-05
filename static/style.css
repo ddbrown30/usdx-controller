@@ -3,15 +3,17 @@
 }
 
 :root {
-    --us-bg: #0c1116;
-    --us-panel: #192029;
-    --us-panel-2: #24303a;
-    --us-text: #f5f0e7;
-    --us-muted: #aeb6bf;
-    --us-soft: #d6cab7;
-    --us-line: rgba(255, 255, 255, 0.1);
-    --us-accent: #62c7b2;
-    --us-shadow: 0 18px 50px rgba(0, 0, 0, 0.36);
+    --us-bg: #070b10;
+    --us-panel: #101923;
+    --us-panel-2: #182531;
+    --us-text: #f5f8fa;
+    --us-muted: #93a8b8;
+    --us-soft: #cfe3ee;
+    --us-line: rgba(119, 187, 210, 0.16);
+    --us-accent: #77bbd2;
+    --us-accent-dark: #1c7eab;
+    --us-gold: #ffdf1f;
+    --us-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
     --us-radius: 5px;
     --us-tap: 46px;
 }
@@ -24,8 +26,8 @@ html {
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: radial-gradient(circle at top left, rgba(98, 199, 178, 0.14), transparent 34%),
-    linear-gradient(180deg, #0e151b, #12161b 48%, #0b0f13);
+    background: radial-gradient(circle at top left, #3a6a9c, transparent 34%),
+    linear-gradient(180deg, #1c3f6e 48%, #0e2449);
     color: var(--us-text);
     overflow: hidden;
 }
@@ -61,7 +63,7 @@ input[type="checkbox"]:checked::after {
     align-items: center;
     justify-content: center;
     color: #302831;
-    background: #ee9b3a;
+    background: var(--us-gold);
     font-weight: 900;
     border-radius: 3px;
 }
@@ -78,7 +80,8 @@ h1 {
     display: flex;
     margin-top: 0;
     padding: 15px;
-    background: #13181d;
+    background: #0b1017;
+    border-bottom: 1px solid var(--us-line);
 }
 
 h1 img {
@@ -115,12 +118,12 @@ h1 img {
 }
 
 #search:focus {
-    outline: 2px solid #584a75;
+    outline: 2px solid var(--us-accent-dark);
     outline-offset: -2px;
 }
 
 #search::placeholder {
-    color: rgb(159, 132, 117);
+    color: var(--us-muted);
 }
 
 #searchField {
@@ -199,7 +202,7 @@ h1 img {
     border: 0;
     border-radius: 5px;
     cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--us-line);
     background: var(--us-panel-2);
     color: var(--us-text);
     min-height: 46px;
@@ -207,6 +210,10 @@ h1 img {
     padding: 0 12px;
     font: inherit;
     font-weight: 700;
+}
+
+.song-button:hover:not(:disabled) {
+    border-color: var(--us-accent-dark);
 }
 
 .song-button:disabled {
@@ -272,10 +279,10 @@ h1 img {
 
 .tab-button.active {
     font-weight: bold;
-    color: #06231f;
-    background: linear-gradient(180deg, #8be0cf, var(--us-accent));
-    border-color: rgba(98, 199, 178, 0.75);
-    box-shadow: 0 0 0 1px rgba(98, 199, 178, 0.22), 0 8px 20px rgba(0, 0, 0, 0.22);
+    color: #06141f;
+    background: linear-gradient(180deg, var(--us-accent), var(--us-accent-dark));
+    border-color: var(--us-accent);
+    box-shadow: 0 0 0 1px rgba(119, 187, 210, 0.3), 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .tab-panel {
