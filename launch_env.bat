@@ -1,9 +1,36 @@
 @echo off
+
+REM Check for administrator privileges
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+if "%~1"=="" (
+powershell -Command "Start-Process '%~f0' -Verb RunAs"
+) else (
+powershell -Command "Start-Process '%~f0' -ArgumentList '%*' -Verb RunAs"
+)
+exit /b
+)
+
 REM Get the folder of this batch file
 set "BATCH_DIR=%~dp0"
 
-REM Set venv path relative to batch file folder
+REM Start in the batch file's directory
+cd /d "%BATCH_DIR%"
+
+REM Set venv path
 set "VENV_PATH=%BATCH_DIR%.venv"
 
-REM Open new cmd with venv activated, quotes handle spaces
-cmd /k ""%VENV_PATH%\Scripts\activate.bat""
+REM Set USDX Bridge directory
+set "USDX_BRIDGE_DIR=E:\Projects\USDX\game\plugins\controller_bridge"
+
+REM Activate virtual environment
+call "%VENV_PATH%\Scripts\activate.bat"
+
+REM If a command was supplied, run it
+if not "%~1"=="" (
+%*
+exit /b
+)
+
+REM Otherwise open an interactive elevated CMD
+cmd /k

@@ -5,7 +5,11 @@ import queue as queue_module
 import threading
 
 from song_database import SongDatabase
-from usdx_controller import play_song
+from usdx_controller import (
+    BridgeTimeoutError,
+    PlayError,
+    play_song,
+)
 
 app = Flask(__name__)
 
@@ -89,6 +93,22 @@ def play():
             "success": True,
             "search": search,
         })
+
+    except BridgeTimeoutError as exc:
+        # USDX never answered - can't tell if it played or not, so treat
+        # it like any other failure and leave the song queued.
+        return jsonify({
+            "success": False,
+            "error": str(exc),
+        }), 504
+
+    except PlayError as exc:
+        # USDX explicitly declined: wrong screen, already singing, or no
+        # match. Nothing happened on the USDX side.
+        return jsonify({
+            "success": False,
+            "error": str(exc),
+        }), 409
 
     except Exception as exc:
         return jsonify({

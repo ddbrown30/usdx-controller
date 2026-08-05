@@ -165,10 +165,10 @@ async function playSong(song, button) {
     } catch (error) {
         console.error(error);
         button.textContent = "Error";
-
+    } finally {
         setTimeout(() => {
             button.disabled = false;
-            button.textContent = "Play";
+            button.innerHTML = '<i class="fa-solid fa-play"></i>';
         }, 2000);
     }
 }
@@ -254,6 +254,12 @@ async function addToQueue(song) {
         await loadQueue();
     } catch (error) {
         console.error(error);
+        button.textContent = "Error";
+    } finally {
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = '<i class="fa-solid fa-play"></i>';
+        }, 2000);
     }
 }
 
@@ -306,12 +312,11 @@ function updateQueueCount(queue) {
     }
 }
 
-async function playNext() {
-    if (!confirm("Start next song? Make sure you're on the song")) {
-        return;
-    }
-
+async function playNext(button) {
     try {
+        button.disabled = true;
+        button.textContent = "Playing...";
+
         // Get the current queue.
         const queueResponse = await fetch("/api/queue");
         if (!queueResponse.ok) {
@@ -345,11 +350,18 @@ async function playNext() {
             );
         }
 
+        button.textContent = "Playing";
+
         // Only remove it after USDX successfully starts the song.
         await removeFromQueue(song.id);
     } catch (error) {
         console.error(error);
-        alert(error.message || "Unable to play next song.");
+        button.textContent = "Error";
+    } finally {
+        setTimeout(() => {
+            button.disabled = false;
+            button.innerHTML = '<i class="fa-solid fa-play"></i>';
+        }, 2000);
     }
 }
 
