@@ -98,13 +98,26 @@ function addSongResult(song) {
     artist.textContent = song.artist;
 
     if (song.is_duet) {
-        const duetImage = document.createElement("img");
+        const titleEnd = document.createElement("span");
+        titleEnd.className = "title-end";
 
+        // Split the title at the last space.
+        const lastSpace = song.title.lastIndexOf(" ");
+
+        if (lastSpace === -1) {
+            titleEnd.textContent = song.title;
+        } else {
+            title.textContent = song.title.substring(0, lastSpace + 1);
+            titleEnd.appendChild(document.createTextNode(song.title.substring(lastSpace + 1) + " "));
+        }
+
+        const duetImage = document.createElement("img");
         duetImage.src = "/static/song_duet.png";
         duetImage.alt = "Duet";
         duetImage.className = "song-duet";
 
-        title.prepend(duetImage);
+        titleEnd.appendChild(duetImage);
+        title.appendChild(titleEnd);
     }
 
     info.appendChild(title);
