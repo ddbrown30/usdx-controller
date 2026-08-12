@@ -10,9 +10,7 @@ from datetime import datetime
 from rapidfuzz import fuzz
 
 
-USDX_CONFIG = Path(
-    r"C:\Program Files (x86)\UltraStar Deluxe\config.ini"
-)
+USDX_CONFIG = Path(r"C:\Program Files (x86)\UltraStar Deluxe\config.ini")
 
 
 @dataclass
