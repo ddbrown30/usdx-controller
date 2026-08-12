@@ -201,11 +201,10 @@ class SongDatabase:
                 results.append((song, score))
 
         results.sort(
-            key=lambda result: result[1],
-            reverse=True,
+            key=lambda result: (-result[1], result[0].title.casefold()),
         )
 
-        return results[:limit]
+        return results
 
     @classmethod
     def _score(cls, query: str, text: str) -> float:
@@ -238,39 +237,3 @@ class SongDatabase:
             total += best
 
         return total / len(query_words)
-
-    @staticmethod
-    def _token_score(query: str, target: str) -> float:
-        # Exact match.
-        if query == target:
-            return 100.0
-
-        # Query can be a prefix of a longer song word.
-        #
-        # "ever" -> "everyone"
-        # "horr" -> "horrible"
-        # "hero" -> "heroes"
-        #
-        # But NOT:
-        # "stars" -> "star"
-        if len(query) < len(target) and target.startswith(query):
-            return 95.0
-
-        # Very short tokens aren't useful for fuzzy matching.
-        if len(query) < 4 or len(target) < 4:
-            return 0.0
-
-        # Don't allow fuzzy matching when the target is shorter
-        # than the query. This prevents:
-        #
-        # "stars" -> "star"
-        if len(target) < len(query):
-            return 0.0
-
-        # Fuzzy matching is only for actual misspellings.
-        ratio = fuzz.ratio(query, target)
-
-        if ratio >= 90:
-            return ratio
-
-        return 0.0
