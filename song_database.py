@@ -5,7 +5,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from rapidfuzz import fuzz
 
@@ -58,8 +58,13 @@ class SongDatabase:
             reverse=True
         )
 
-        for song in songs[:20]:
-            song.is_new = True
+        if songs:
+            newest_date = songs[0].created
+            max_age = newest_date - timedelta(days=180)
+            for i, song in enumerate(songs):
+                if i > 20 and song.created < max_age:
+                    break
+                song.is_new = True
 
         self.songs = songs
 

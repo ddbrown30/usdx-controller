@@ -3,7 +3,8 @@ const searchInput = document.getElementById("search");
 const searchField = document.getElementById("searchField");
 const searchStatus = document.getElementById("searchStatus");
 const results = document.getElementById("results");
-const duetsOnly = document.getElementById("duetsOnly");
+const duetsFilter = document.getElementById("duetsFilter");
+const newFilter = document.getElementById("newFilter");
 
 let searchTimer = null;
 
@@ -17,7 +18,11 @@ searchField.addEventListener("change", () => {
     searchSongs();
 });
 
-duetsOnly.addEventListener("change", () => {
+duetsFilter.addEventListener("change", () => {
+    searchSongs();
+});
+
+newFilter.addEventListener("change", () => {
     searchSongs();
 });
 
@@ -51,7 +56,8 @@ async function searchSongs() {
         const params = new URLSearchParams({
             q: query,
             field: field,
-            duets_only: duetsOnly.checked ? "1" : "0",
+            duets_filter: duetsFilter.checked ? "1" : "0",
+            new_filter: newFilter.checked ? "1" : "0",
         });
 
         const response = await fetch(
@@ -91,13 +97,12 @@ function addSongResult(song) {
 
     const title = document.createElement("div");
     title.className = "song-title";
-    title.textContent = song.title;
 
     const artist = document.createElement("div");
     artist.className = "song-artist";
     artist.textContent = song.artist;
 
-    if (song.is_duet) {
+    if (song.is_duet || song.is_new) {
         const titleEnd = document.createElement("span");
         titleEnd.className = "title-end";
 
@@ -105,19 +110,30 @@ function addSongResult(song) {
         const lastSpace = song.title.lastIndexOf(" ");
 
         if (lastSpace === -1) {
-            titleEnd.textContent = song.title;
+            titleEnd.textContent = song.title + " ";
         } else {
             title.textContent = song.title.substring(0, lastSpace + 1);
             titleEnd.appendChild(document.createTextNode(song.title.substring(lastSpace + 1) + " "));
         }
+        console.log(titleEnd.textContent)
 
-        const duetImage = document.createElement("img");
-        duetImage.src = "/static/song_duet.png";
-        duetImage.alt = "Duet";
-        duetImage.className = "song-duet";
+        if (song.is_duet) {
+            const duetImage = document.createElement("img");
+            duetImage.src = "/static/song_duet.png";
+            duetImage.alt = "Duet";
+            duetImage.className = "song-duet";
+            titleEnd.appendChild(duetImage);
+        }
 
-        titleEnd.appendChild(duetImage);
+        if (song.is_new) {
+            const newIndicator = document.createElement("i");
+            newIndicator.className = "fa-solid fa-star song-new";
+            titleEnd.appendChild(newIndicator);
+        }
+
         title.appendChild(titleEnd);
+    } else {
+        title.textContent = song.title;
     }
 
     info.appendChild(title);

@@ -43,7 +43,8 @@ def index():
 def search():
     query = request.args.get("q", "").strip()
     field = request.args.get("field", "all").lower()
-    duets_only = request.args.get("duets_only") == "1"
+    duets_filter = request.args.get("duets_filter") == "1"
+    new_filter = request.args.get("new_filter") == "1"
 
     if field not in {"all", "title", "artist"}:
         return jsonify({
@@ -56,11 +57,12 @@ def search():
         limit=50,
     )
 
-    if duets_only:
+    if duets_filter or new_filter:
         results = [
             (song, score)
             for song, score in results
-            if song.is_duet
+            if (not duets_filter or song.is_duet)
+            and (not new_filter or song.is_new)
         ]
 
     return jsonify([
