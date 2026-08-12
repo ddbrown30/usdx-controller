@@ -69,6 +69,7 @@ def search():
             "title": song.title,
             "artist": song.artist,
             "is_duet": song.is_duet,
+            "is_new": song.is_new,
             "score": round(score, 1),
         }
         for song, score in results
@@ -238,4 +239,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=5000,
         debug=True,
+        use_reloader=False,
     )

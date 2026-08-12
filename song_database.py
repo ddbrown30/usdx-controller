@@ -5,6 +5,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
+from datetime import datetime
 
 from rapidfuzz import fuzz
 
@@ -21,6 +22,9 @@ class Song:
     artist: str
     txt_path: Path
     is_duet: bool
+    created: datetime
+    modified: datetime
+    is_new: bool = False
 
     @property
     def search_text(self) -> str:
@@ -49,6 +53,15 @@ class SongDatabase:
 
                 if song is not None:
                     songs.append(song)
+
+        songs = sorted(
+            songs,
+            key=lambda song: song.created,
+            reverse=True
+        )
+
+        for song in songs[:20]:
+            song.is_new = True
 
         self.songs = songs
 
@@ -91,6 +104,12 @@ class SongDatabase:
         artist = None
         is_duet = False
 
+        stat = path.stat()
+        created = datetime.fromtimestamp(stat.st_ctime)
+        modified = datetime.fromtimestamp(stat.st_mtime)
+
+        is_new = path.parts[1] == "New"
+
         try:
             try:
                 text = path.read_text(encoding="utf-8-sig")
@@ -122,6 +141,9 @@ class SongDatabase:
             artist=artist,
             txt_path=path,
             is_duet=is_duet,
+            created=created,
+            modified=modified,
+            is_new=is_new,
         )
 
     @staticmethod
@@ -144,14 +166,15 @@ class SongDatabase:
         self,
         query: str,
         field: str = "all",
-        limit: int = 50,
+        limit: int = 100,
     ) -> list[tuple[Song, float]]:
         query = self._normalize(query)
 
         if not query:
             songs = sorted(
                 self.songs,
-                key=lambda song: (song.artist.casefold(), song.title.casefold())
+                key=lambda song: (song.is_new, song.created),
+                reverse=True,
             )
             return [(song, 0) for song in songs]
 
@@ -182,7 +205,7 @@ class SongDatabase:
         return results[:limit]
 
     @classmethod
-    def _score(self, query: str, text: str) -> float:
+    def _score(cls, query: str, text: str) -> float:
         query_words = query.split()
         text_words = text.split()
 
