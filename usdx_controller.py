@@ -18,7 +18,7 @@ import uuid
 # Override with the USDX_BRIDGE_DIR environment variable if USDX is
 # installed somewhere other than the default below.
 
-DEFAULT_BRIDGE_DIR = r"C:\Program Files\UltraStar Deluxe\plugins\controller_bridge"
+DEFAULT_BRIDGE_DIR = r"C:\Program Files (x86)\UltraStar Deluxe\plugins\controller_bridge"
 
 BRIDGE_DIR = os.environ.get("USDX_BRIDGE_DIR", DEFAULT_BRIDGE_DIR)
 
