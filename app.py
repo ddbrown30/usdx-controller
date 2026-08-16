@@ -53,8 +53,9 @@ def search():
 
     results = song_database.search(
         query=query,
+        duets_filter=duets_filter,
+        new_filter=new_filter,
         field=field,
-        limit=100,
     )
 
     if duets_filter or new_filter:

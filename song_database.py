@@ -58,11 +58,12 @@ class SongDatabase:
             reverse=True
         )
 
+        new_count = sum(song.is_new for song in songs)
         if songs:
             newest_date = songs[0].created
             max_age = newest_date - timedelta(days=180)
             for i, song in enumerate(songs):
-                if i > 20 and song.created < max_age:
+                if i + new_count > 50 or (i > 20 and song.created < max_age):
                     break
                 song.is_new = True
 
@@ -168,17 +169,23 @@ class SongDatabase:
     def search(
         self,
         query: str,
+        duets_filter: bool,
+        new_filter: bool,
         field: str = "all",
-        limit: int = 100,
     ) -> list[tuple[Song, float]]:
         query = self._normalize(query)
 
         if not query:
-            songs = sorted(
-                self.songs,
-                key=lambda song: (song.is_new, song.created),
-                reverse=True,
-            )
+            if duets_filter:
+                songs = sorted(
+                    self.songs,
+                    key=lambda song: (song.artist, song.title),
+                )
+            else:
+                songs = sorted(
+                    self.songs,
+                    key=lambda song: (-song.is_new, song.artist, song.title),
+                )
             return [(song, 0) for song in songs]
 
         results: list[tuple[Song, float]] = []
