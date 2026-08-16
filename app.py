@@ -112,7 +112,7 @@ def play():
         return jsonify({
             "success": False,
             "error": str(exc),
-        }), 409
+        }), 200
 
     except Exception as exc:
         return jsonify({

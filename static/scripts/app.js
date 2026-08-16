@@ -115,7 +115,6 @@ function addSongResult(song) {
             title.textContent = song.title.substring(0, lastSpace + 1);
             titleEnd.appendChild(document.createTextNode(song.title.substring(lastSpace + 1) + " "));
         }
-        console.log(titleEnd.textContent)
 
         if (song.is_duet) {
             const duetImage = document.createElement("img");
@@ -155,7 +154,7 @@ function addSongResult(song) {
     queueButton.innerHTML = '<i class="fa-solid fa-plus"></i>';
 
     queueButton.addEventListener("click", () => {
-        addToQueue(song);
+        addToQueue(song, queueButton);
     });
 
     controls.appendChild(playButton);
@@ -171,6 +170,7 @@ async function playSong(song, button) {
     button.disabled = true;
     button.textContent = "Playing...";
 
+    let success = false;
     try {
         const response = await fetch("/api/play", {
             method: "POST",
@@ -185,14 +185,19 @@ async function playSong(song, button) {
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-            throw new Error(
-                data.error || "Unable to play song."
-            );
+            const error = new Error(data.error || "Unable to play song.");
+            error.status = response.status;
+            throw error
         }
 
         button.textContent = "Playing";
+        success = true;
     } catch (error) {
-        console.error(error);
+        if (error.status === 200) {
+            console.log("USDX declined to play the song.");
+        } else {
+            console.error(error);
+        }
         button.textContent = "Error";
     } finally {
         setTimeout(() => {
@@ -200,6 +205,8 @@ async function playSong(song, button) {
             button.innerHTML = '<i class="fa-solid fa-play"></i>';
         }, 2000);
     }
+
+    return success;
 }
 
 async function loadQueue() {
@@ -224,7 +231,7 @@ function renderQueue(songs) {
     queueElement.innerHTML = "";
 
     if (songs.length === 0) {
-        queueElement.innerHTML ='<div class="no-results">Queue is empty.</div>';
+        queueElement.innerHTML = '<div class="no-results">Queue is empty.</div>';
         updateQueueCount(songs);
         return;
     }
@@ -247,16 +254,37 @@ function renderQueue(songs) {
         info.appendChild(title);
         info.appendChild(artist);
 
+        const controls = document.createElement("div");
+        controls.className = "song-controls";
+
+        const playButton = document.createElement("button");
+        playButton.className = "song-button";
+        playButton.innerHTML = '<i class="fa-solid fa-play"></i>';
+
+        playButton.addEventListener("click", async () => {
+            const success = await playSong(song, playButton);
+            if (success) {
+                removeFromQueue(song.id);
+            }
+        });
+
         const removeButton = document.createElement("button");
         removeButton.className = "song-button";
         removeButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
 
         removeButton.addEventListener("click", () => {
+            if (!confirm("Remove song from queue?")) {
+                return;
+            }
             removeFromQueue(song.id);
         });
 
+
+        controls.appendChild(playButton);
+        controls.appendChild(removeButton);
+
         element.appendChild(info);
-        element.appendChild(removeButton);
+        element.appendChild(controls);
 
         queueElement.appendChild(element);
     });
@@ -264,8 +292,10 @@ function renderQueue(songs) {
     updateQueueCount(songs);
 }
 
-async function addToQueue(song) {
+async function addToQueue(song, button) {
     try {
+        button.disabled = true;
+
         const response = await fetch("/api/queue", {
             method: "POST",
             headers: {
@@ -287,7 +317,6 @@ async function addToQueue(song) {
     } finally {
         setTimeout(() => {
             button.disabled = false;
-            button.innerHTML = '<i class="fa-solid fa-play"></i>';
         }, 2000);
     }
 }
@@ -359,7 +388,6 @@ async function playNext(button) {
         }
 
         const song = queue[0];
-        console.log(queue);
 
         const response = await fetch("/api/play", {
             method: "POST",
@@ -374,9 +402,9 @@ async function playNext(button) {
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-            throw new Error(
-                data.error || "Unable to play song."
-            );
+            const error = new Error(data.error || "Unable to play song.");
+            error.status = response.status;
+            throw error
         }
 
         button.textContent = "Playing";
@@ -384,7 +412,11 @@ async function playNext(button) {
         // Only remove it after USDX successfully starts the song.
         await removeFromQueue(song.id);
     } catch (error) {
-        console.error(error);
+        if (error.status === 200) {
+            console.log("USDX declined to play the song.");
+        } else {
+            console.error(error);
+        }
         button.textContent = "Error";
     } finally {
         setTimeout(() => {
