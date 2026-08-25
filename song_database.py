@@ -30,12 +30,17 @@ class Song:
 
 
 class SongDatabase:
-    def __init__(self, config_path: Path = USDX_CONFIG):
+    def __init__(
+        self,
+        config_path: Path = USDX_CONFIG,
+        song_dirs: list[Path] | None = None,
+    ):
         self.config_path = config_path
+        self.song_dirs = song_dirs
         self.songs: list[Song] = []
 
     def load(self) -> None:
-        song_dirs = self._get_song_dirs()
+        song_dirs = self.song_dirs if self.song_dirs is not None else self._get_song_dirs()
 
         songs: list[Song] = []
 

@@ -14,8 +14,11 @@ exit /b
 REM Get the folder of this batch file
 set "BATCH_DIR=%~dp0"
 
-REM Start in the batch file's directory
-cd /d "%BATCH_DIR%"
+REM Start in the batch file's directory. Use pushd rather than cd /d:
+REM cd can't set a UNC path as the current directory ("CMD does not
+REM support UNC paths as current directory"), but pushd works around
+REM that by mapping a temporary drive letter to the share.
+pushd "%BATCH_DIR%"
 
 REM Set venv path
 set "VENV_PATH=%BATCH_DIR%.venv"
