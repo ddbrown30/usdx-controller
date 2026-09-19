@@ -23,8 +23,10 @@ pushd "%BATCH_DIR%"
 REM Set venv path
 set "VENV_PATH=%BATCH_DIR%.venv"
 
-REM Set USDX Bridge directory
-set "USDX_BRIDGE_DIR=E:\Projects\USDX\game\plugins\controller_bridge"
+REM USDX_BRIDGE_DIR is deliberately left unset here: app.py's default
+REM (C:\Program Files (x86)\UltraStar Deluxe\plugins\controller_bridge)
+REM already points at the actual installed game. Only override it if
+REM USDX is installed somewhere else.
 
 REM Activate virtual environment
 call "%VENV_PATH%\Scripts\activate.bat"

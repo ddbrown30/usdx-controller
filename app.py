@@ -10,6 +10,7 @@ from song_database import SongDatabase
 from usdx_controller import (
     BridgeTimeoutError,
     PlayError,
+    get_now_playing,
     play_song,
 )
 
@@ -309,6 +310,22 @@ def remove_favourite(song_id):
 
     return jsonify({
         "success": True,
+    })
+
+
+@app.route("/api/now_playing")
+def now_playing():
+    current = get_now_playing()
+
+    if current is None:
+        return jsonify({
+            "title": None,
+            "artist": None,
+        })
+
+    return jsonify({
+        "title": current.title,
+        "artist": current.artist,
     })
 
 

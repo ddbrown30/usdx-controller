@@ -4,6 +4,7 @@ import argparse
 import os
 import time
 import uuid
+from dataclasses import dataclass
 
 
 # ---------------------------------------------------------------------------
@@ -24,6 +25,7 @@ BRIDGE_DIR = os.environ.get("USDX_BRIDGE_DIR", DEFAULT_BRIDGE_DIR)
 
 REQUEST_FILE = os.path.join(BRIDGE_DIR, "request.txt")
 RESPONSE_FILE = os.path.join(BRIDGE_DIR, "response.txt")
+NOW_PLAYING_FILE = os.path.join(BRIDGE_DIR, "now_playing.txt")
 
 # How long to wait for USDX to pick up and answer a request. USDX polls
 # once per drawn frame, so this only needs to cover a few frames' worth
@@ -46,6 +48,12 @@ class SongNotFoundError(PlayError):
 
 class BridgeTimeoutError(PlayError):
     """Raised when USDX never answered the request."""
+
+
+@dataclass
+class NowPlaying:
+    title: str
+    artist: str
 
 
 def _write_request(search_text: str) -> None:
@@ -119,6 +127,32 @@ def play_song(search_text: str) -> None:
     raise PlayError(
         "USDX declined the play request."
     )
+
+
+def get_now_playing() -> NowPlaying | None:
+    """
+    Returns the title/artist of the song currently on USDX's sing
+    screen, or None if nothing is playing (song select, scoring,
+    etc).
+
+    Unlike play_song's request/response handshake, this just reads
+    now_playing.txt directly: the Lua plugin is its sole writer and
+    keeps it constantly up to date on its own, so there's no request
+    to make or hand-off to claim here.
+    """
+
+    try:
+        with open(NOW_PLAYING_FILE, "r", encoding="utf-8") as f:
+            contents = f.read()
+    except FileNotFoundError:
+        return None
+
+    if not contents:
+        return None
+
+    title, _, artist = contents.partition("\n")
+
+    return NowPlaying(title=title, artist=artist)
 
 
 # ---------------------------------------------------------------------------

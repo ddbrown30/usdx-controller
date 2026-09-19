@@ -110,6 +110,12 @@ h1 img {
     color: var(--us-soft);
 }
 
+.now-playing {
+    margin-top: 8px;
+    font-size: 15px;
+    color: var(--us-soft);
+}
+
 .icon-button {
     flex-shrink: 0;
     border: 1px solid var(--us-line);

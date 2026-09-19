@@ -968,9 +968,33 @@ async function deleteAdminUser(username, row, button) {
     }
 }
 
+// --- Now playing ---------------------------------------------------------
+
+const nowPlayingDisplay = document.getElementById("now-playing");
+
+async function loadNowPlaying() {
+    try {
+        const response = await fetch("/api/now_playing");
+
+        if (!response.ok) {
+            throw new Error("Failed to load now playing.");
+        }
+
+        const data = await response.json();
+
+        nowPlayingDisplay.textContent = data.title
+            ? `Now Playing: ${data.title} - ${data.artist}`
+            : "Now Playing: -";
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 updateClearButtonVisibility();
 initUser();
 searchSongs();
+loadNowPlaying();
+setInterval(loadNowPlaying, 3000);
 
 const queueEvents = new EventSource("/api/queue/events");
 queueEvents.addEventListener("message", () => {
