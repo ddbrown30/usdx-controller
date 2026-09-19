@@ -82,6 +82,26 @@ def get_user():
     })
 
 
+@app.route("/api/users")
+def get_users():
+    return jsonify(app_database.get_all_usernames())
+
+
+@app.route("/api/users/<path:username>", methods=["DELETE"])
+def delete_user(username):
+    if not app_database.user_exists(username):
+        return jsonify({
+            "success": False,
+            "error": "User not found.",
+        }), 404
+
+    app_database.delete_user(username)
+
+    return jsonify({
+        "success": True,
+    })
+
+
 @app.route("/api/user/login", methods=["POST"])
 def login_user():
     data = request.get_json(silent=True) or {}

@@ -560,11 +560,19 @@ const confirmUsernameSpan = document.getElementById("confirm-username");
 const confirmYesBtn = document.getElementById("confirm-yes-btn");
 const confirmNoBtn = document.getElementById("confirm-no-btn");
 
+const browseUsersBtn = document.getElementById("browse-users-btn");
+const loginStepBrowse = document.getElementById("login-step-browse");
+const browseUsersSearch = document.getElementById("browse-users-search");
+const browseUsersError = document.getElementById("browse-users-error");
+const browseUsersList = document.getElementById("browse-users-list");
+const browseUsersBackBtn = document.getElementById("browse-users-back-btn");
+
 const renameOverlay = document.getElementById("rename-overlay");
 const renameUsernameInput = document.getElementById("rename-username-input");
 const renameError = document.getElementById("rename-error");
 const renameSaveBtn = document.getElementById("rename-save-btn");
 const renameCancelBtn = document.getElementById("rename-cancel-btn");
+const switchUserBtn = document.getElementById("switch-user-btn");
 
 let pendingLoginUsername = null;
 
@@ -620,9 +628,23 @@ function setCurrentUsername(username) {
     usernameDisplay.textContent = username;
 }
 
+// Resets local session state and reopens the login flow. The server
+// side of "logging out" happens implicitly: once the account behind
+// the cookie no longer exists (or a different one is chosen), the
+// next /api/user check already reports needs_login on its own - this
+// just makes that switch happen immediately client-side instead of
+// waiting for the next check.
+function logOutCurrentUser() {
+    currentUsername = null;
+    usernameDisplay.textContent = "";
+    renameOverlay.hidden = true;
+    showLoginModal();
+}
+
 function showLoginModal() {
     loginStepEnter.hidden = false;
     loginStepConfirm.hidden = true;
+    loginStepBrowse.hidden = true;
     loginError.textContent = "";
     loginUsernameInput.value = "";
     loginOverlay.hidden = false;
@@ -631,6 +653,133 @@ function showLoginModal() {
 
 function hideLoginModal() {
     loginOverlay.hidden = true;
+}
+
+let allUsernames = null;
+
+browseUsersBtn.addEventListener("click", () => {
+    loginStepEnter.hidden = true;
+    loginStepBrowse.hidden = false;
+    browseUsersError.textContent = "";
+    browseUsersSearch.value = "";
+    openBrowseUsers();
+    browseUsersSearch.focus();
+});
+
+browseUsersBackBtn.addEventListener("click", () => {
+    loginStepBrowse.hidden = true;
+    loginStepEnter.hidden = false;
+    loginUsernameInput.focus();
+});
+
+browseUsersSearch.addEventListener("input", () => {
+    renderBrowseUsersList(browseUsersSearch.value);
+});
+
+async function openBrowseUsers() {
+    browseUsersList.innerHTML = '<div class="browse-users-empty">Loading...</div>';
+
+    try {
+        const response = await fetch("/api/users");
+
+        if (!response.ok) {
+            throw new Error("Failed to load users.");
+        }
+
+        allUsernames = await response.json();
+        renderBrowseUsersList(browseUsersSearch.value);
+    } catch (error) {
+        console.error(error);
+        allUsernames = null;
+        browseUsersList.innerHTML = '<div class="browse-users-empty">Failed to load users.</div>';
+    }
+}
+
+function renderBrowseUsersList(filterText) {
+    if (allUsernames === null) {
+        return;
+    }
+
+    const filter = filterText.trim().toLowerCase();
+    const filtered = filter
+        ? allUsernames.filter((name) => name.toLowerCase().includes(filter))
+        : allUsernames;
+
+    browseUsersList.innerHTML = "";
+
+    if (filtered.length === 0) {
+        browseUsersList.innerHTML = allUsernames.length === 0
+            ? '<div class="browse-users-empty">No users yet.</div>'
+            : '<div class="browse-users-empty">No matches.</div>';
+        return;
+    }
+
+    for (const name of filtered) {
+        const row = document.createElement("button");
+        row.type = "button";
+        row.className = "browse-user-row";
+        row.textContent = name;
+
+        row.addEventListener("click", () => {
+            selectExistingUser(name);
+        });
+
+        browseUsersList.appendChild(row);
+    }
+}
+
+async function selectExistingUser(username) {
+    browseUsersError.textContent = "";
+
+    const rows = browseUsersList.querySelectorAll(".browse-user-row");
+    rows.forEach((row) => {
+        row.disabled = true;
+    });
+
+    // Picking a name from the list is already an explicit, unambiguous
+    // choice, so skip the "Are you X?" confirmation step and log
+    // straight in.
+    const data = await performLogin(username, true);
+
+    if (data && data.success) {
+        onLoginSuccess(data.username);
+    } else {
+        rows.forEach((row) => {
+            row.disabled = false;
+        });
+        browseUsersError.textContent = (data && data.error) || "Something went wrong.";
+    }
+}
+
+function onLoginSuccess(username) {
+    hideLoginModal();
+    setCurrentUsername(username);
+    searchSongs();
+    loadQueue();
+
+    // Switching accounts mid-session (via Switch User, or being logged
+    // out from under yourself) can leave the favourites tab showing
+    // the previous account's list if it was already open.
+    if (document.getElementById("favourites-tab").classList.contains("active")) {
+        loadFavourites();
+    }
+}
+
+async function performLogin(username, confirm) {
+    try {
+        const response = await fetch("/api/user/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, confirm }),
+        });
+
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
 }
 
 loginContinueBtn.addEventListener("click", submitLogin);
@@ -652,63 +801,32 @@ async function submitLogin() {
     loginError.textContent = "";
     loginContinueBtn.disabled = true;
 
-    try {
-        const response = await fetch("/api/user/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username }),
-        });
+    const data = await performLogin(username, false);
 
-        const data = await response.json();
-
-        if (data.success) {
-            hideLoginModal();
-            setCurrentUsername(data.username);
-            searchSongs();
-            loadQueue();
-        } else if (data.exists) {
-            pendingLoginUsername = username;
-            confirmUsernameSpan.textContent = username;
-            loginStepEnter.hidden = true;
-            loginStepConfirm.hidden = false;
-        } else {
-            loginError.textContent = data.error || "Something went wrong.";
-        }
-    } catch (error) {
-        console.error(error);
-        loginError.textContent = "Something went wrong.";
-    } finally {
-        loginContinueBtn.disabled = false;
+    if (data && data.success) {
+        onLoginSuccess(data.username);
+    } else if (data && data.exists) {
+        pendingLoginUsername = username;
+        confirmUsernameSpan.textContent = username;
+        loginStepEnter.hidden = true;
+        loginStepConfirm.hidden = false;
+    } else {
+        loginError.textContent = (data && data.error) || "Something went wrong.";
     }
+
+    loginContinueBtn.disabled = false;
 }
 
 confirmYesBtn.addEventListener("click", async () => {
     confirmYesBtn.disabled = true;
 
-    try {
-        const response = await fetch("/api/user/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username: pendingLoginUsername, confirm: true }),
-        });
+    const data = await performLogin(pendingLoginUsername, true);
 
-        const data = await response.json();
-
-        if (data.success) {
-            hideLoginModal();
-            setCurrentUsername(data.username);
-            searchSongs();
-            loadQueue();
-        }
-    } catch (error) {
-        console.error(error);
-    } finally {
-        confirmYesBtn.disabled = false;
+    if (data && data.success) {
+        onLoginSuccess(data.username);
     }
+
+    confirmYesBtn.disabled = false;
 });
 
 confirmNoBtn.addEventListener("click", () => {
@@ -726,6 +844,10 @@ renameUserBtn.addEventListener("click", () => {
 
 renameCancelBtn.addEventListener("click", () => {
     renameOverlay.hidden = true;
+});
+
+switchUserBtn.addEventListener("click", () => {
+    logOutCurrentUser();
 });
 
 renameUsernameInput.addEventListener("keydown", (event) => {
@@ -769,6 +891,112 @@ async function submitRename() {
         renameError.textContent = "Something went wrong.";
     } finally {
         renameSaveBtn.disabled = false;
+    }
+}
+
+// --- Admin -------------------------------------------------------------
+
+const adminTabButton = document.getElementById("admin-tab-button");
+const userManagementBtn = document.getElementById("user-management-btn");
+const adminUserManagement = document.getElementById("admin-user-management");
+const adminUserError = document.getElementById("admin-user-error");
+const adminUserList = document.getElementById("admin-user-list");
+
+const isAdminMode = new URLSearchParams(window.location.search).has("admin");
+
+if (isAdminMode) {
+    adminTabButton.hidden = false;
+}
+
+userManagementBtn.addEventListener("click", () => {
+    adminUserManagement.hidden = false;
+    loadAdminUsers();
+});
+
+async function loadAdminUsers() {
+    adminUserError.textContent = "";
+    adminUserList.innerHTML = '<div class="no-results">Loading...</div>';
+
+    try {
+        const response = await fetch("/api/users");
+
+        if (!response.ok) {
+            throw new Error("Failed to load users.");
+        }
+
+        const usernames = await response.json();
+
+        adminUserList.innerHTML = "";
+
+        if (usernames.length === 0) {
+            adminUserList.innerHTML = '<div class="no-results">No users yet.</div>';
+            return;
+        }
+
+        for (const name of usernames) {
+            adminUserList.appendChild(buildAdminUserRow(name));
+        }
+    } catch (error) {
+        console.error(error);
+        adminUserList.innerHTML = "";
+        adminUserError.textContent = "Failed to load users.";
+    }
+}
+
+function buildAdminUserRow(username) {
+    const row = document.createElement("div");
+    row.className = "admin-user-row";
+
+    const name = document.createElement("span");
+    name.className = "admin-user-name";
+    name.textContent = username;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "song-button";
+    deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+
+    deleteBtn.addEventListener("click", () => {
+        if (!confirm(`Delete user "${username}"? This cannot be undone.`)) {
+            return;
+        }
+
+        deleteAdminUser(username, row, deleteBtn);
+    });
+
+    row.appendChild(name);
+    row.appendChild(deleteBtn);
+
+    return row;
+}
+
+async function deleteAdminUser(username, row, button) {
+    adminUserError.textContent = "";
+    button.disabled = true;
+
+    try {
+        const response = await fetch(`/api/users/${encodeURIComponent(username)}`, {
+            method: "DELETE",
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || "Failed to delete user.");
+        }
+
+        row.remove();
+
+        if (adminUserList.children.length === 0) {
+            adminUserList.innerHTML = '<div class="no-results">No users yet.</div>';
+        }
+
+        if (currentUsername && username.toLowerCase() === currentUsername.toLowerCase()) {
+            logOutCurrentUser();
+        }
+    } catch (error) {
+        console.error(error);
+        adminUserError.textContent = error.message || "Failed to delete user.";
+        button.disabled = false;
     }
 }
 

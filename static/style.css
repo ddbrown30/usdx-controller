@@ -346,7 +346,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .modal {
     width: 100%;
-    max-width: 360px;
+    max-width: 420px;
     background: var(--us-panel);
     border: 1px solid var(--us-line);
     border-radius: 10px;
@@ -409,6 +409,90 @@ input[type="search"]::-webkit-search-cancel-button {
 .secondary-button {
     background: var(--us-panel-2);
     color: var(--us-text);
+}
+
+.browse-users-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 50vh;
+    overflow-y: auto;
+    margin-bottom: 8px;
+}
+
+.browse-user-row {
+    width: 100%;
+    text-align: left;
+    padding: 10px 14px;
+    border-radius: var(--us-radius);
+    border: 1px solid var(--us-line);
+    background: var(--us-panel-2);
+    color: var(--us-text);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 42px;
+}
+
+.browse-user-row:hover:not(:disabled) {
+    border-color: var(--us-accent-dark);
+    background: var(--us-panel);
+}
+
+.browse-user-row:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.browse-users-empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--us-muted);
+}
+
+.admin-section {
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.admin-user-management {
+    margin-top: 20px;
+}
+
+.admin-user-management h3 {
+    margin: 0 0 10px;
+}
+
+.admin-user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-user-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 10px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01)), var(--us-panel);
+    border: 1px solid var(--us-line);
+    border-radius: 6px;
+}
+
+.admin-user-name {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.switch-user-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--us-line);
+}
+
+.switch-user-section .secondary-button {
+    width: 100%;
 }
 
 .queue-section,

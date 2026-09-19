@@ -37,9 +37,25 @@
             <button class="tab-button" data-tab="queue-tab">
                 Queue <span id="queue-count"></span>
             </button>
+
+            <button class="tab-button" data-tab="admin-tab" id="admin-tab-button" hidden>
+                Admin
+            </button>
         </div>
 
         <div class="container">
+
+            <div id="admin-tab" class="tab-panel">
+                <div class="admin-section">
+                    <button id="user-management-btn" class="primary-button" type="button">User Management</button>
+
+                    <div id="admin-user-management" class="admin-user-management" hidden>
+                        <h3>Users</h3>
+                        <div id="admin-user-error" class="modal-error"></div>
+                        <div id="admin-user-list" class="admin-user-list"></div>
+                    </div>
+                </div>
+            </div>
 
             <div id="queue-tab" class="tab-panel">
                 <div class="queue-section">
@@ -115,6 +131,7 @@
                     <input id="login-username-input" type="text" placeholder="Username" autocomplete="off" autocapitalize="sentences" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other" maxlength="40">
                     <div id="login-error" class="modal-error"></div>
                     <div class="modal-actions">
+                        <button id="browse-users-btn" class="secondary-button" type="button">Browse users</button>
                         <button id="login-continue-btn" class="primary-button">Continue</button>
                     </div>
                 </div>
@@ -125,6 +142,16 @@
                     <div class="modal-actions">
                         <button id="confirm-yes-btn" class="primary-button">Yes, that's me</button>
                         <button id="confirm-no-btn" class="secondary-button">Choose another name</button>
+                    </div>
+                </div>
+
+                <div id="login-step-browse" class="modal-step" hidden>
+                    <h2>Choose a user</h2>
+                    <input id="browse-users-search" type="text" placeholder="Search users..." autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other">
+                    <div id="browse-users-error" class="modal-error"></div>
+                    <div id="browse-users-list" class="browse-users-list"></div>
+                    <div class="modal-actions">
+                        <button id="browse-users-back-btn" class="secondary-button" type="button">Back</button>
                     </div>
                 </div>
             </div>
@@ -139,6 +166,10 @@
                 <div class="modal-actions">
                     <button id="rename-save-btn" class="primary-button">Save</button>
                     <button id="rename-cancel-btn" class="secondary-button">Cancel</button>
+                </div>
+
+                <div class="switch-user-section">
+                    <button id="switch-user-btn" class="secondary-button" type="button">Switch User</button>
                 </div>
             </div>
         </div>

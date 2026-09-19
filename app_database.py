@@ -163,6 +163,27 @@ class AppDatabase:
                     (new_key, old_key),
                 )
 
+    def get_all_usernames(self) -> list[str]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT username FROM users ORDER BY username_key"
+            ).fetchall()
+
+        return [row["username"] for row in rows]
+
+    def delete_user(self, username: str) -> None:
+        key = self._username_key(username)
+
+        with self._lock, self._conn:
+            self._conn.execute("DELETE FROM users WHERE username_key = ?", (key,))
+            self._conn.execute(
+                "DELETE FROM favourites WHERE username_key = ?", (key,)
+            )
+            # Queue entries are left alone rather than deleted or
+            # reassigned: load_queue() already falls back to showing the
+            # raw key if it no longer matches a user, which is the
+            # right behavior for a deleted user's still-queued songs.
+
     # --- Favourites ----------------------------------------------------
 
     def get_favourite_ids(self, username: str) -> set[str]:
