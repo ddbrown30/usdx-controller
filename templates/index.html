@@ -12,11 +12,26 @@
     </head>
 
     <body>
-        <h1><img src="/static/favicon.ico">UltraStar Controller</h1>
+        <div class="header">
+            <h1>
+                <img src="/static/favicon.ico">UltraStar Controller
+            </h1>
+
+            <div id="user-bar" class="user-bar">
+                <span id="username-display"></span>
+                <button id="rename-user-btn" class="icon-button" title="Rename user">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+            </div>
+        </div>
 
         <div class="tabs">
             <button class="tab-button active" data-tab="search-tab">
                 Search
+            </button>
+
+            <button class="tab-button" data-tab="favourites-tab">
+                Favourites
             </button>
 
             <button class="tab-button" data-tab="queue-tab">
@@ -44,15 +59,27 @@
                 </div>
             </div>
 
+            <div id="favourites-tab" class="tab-panel">
+                <div class="favourites-section">
+                    <div id="favourites" class="results"></div>
+                </div>
+            </div>
+
             <div id="search-tab" class="tab-panel active">
                 <div class="search-section">
                     <div class="search-controls">
-                        <input
-                               id="search"
-                               type="search"
-                               placeholder="Search songs..."
-                               autocomplete="off"
-                               autofocus>
+                        <div class="search-input-wrap">
+                            <input
+                                   id="search"
+                                   type="search"
+                                   placeholder="Search songs..."
+                                   autocomplete="off"
+                                   autofocus>
+
+                            <button id="clearSearch" class="clear-search-btn" type="button" title="Clear search">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
 
                         <select id="searchField">
                             <option value="all">Title + Artist</option>
@@ -77,6 +104,42 @@
                 </div>
 
                 <div id="results" class="results"></div>
+            </div>
+        </div>
+
+        <div id="login-overlay" class="modal-overlay" hidden>
+            <div class="modal">
+                <div id="login-step-enter" class="modal-step">
+                    <h2>Who's playing?</h2>
+                    <p class="modal-sub">Enter a username to get started.</p>
+                    <input id="login-username-input" type="text" placeholder="Username" autocomplete="off" autocapitalize="sentences" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other" maxlength="40">
+                    <div id="login-error" class="modal-error"></div>
+                    <div class="modal-actions">
+                        <button id="login-continue-btn" class="primary-button">Continue</button>
+                    </div>
+                </div>
+
+                <div id="login-step-confirm" class="modal-step" hidden>
+                    <h2>User Found</h2>
+                    <p class="modal-sub">Are you <span id="confirm-username"></span>?</p>
+                    <div class="modal-actions">
+                        <button id="confirm-yes-btn" class="primary-button">Yes, that's me</button>
+                        <button id="confirm-no-btn" class="secondary-button">Choose another name</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="rename-overlay" class="modal-overlay" hidden>
+            <div class="modal">
+                <h2>Rename user</h2>
+                <p class="modal-sub">Your favourites will be kept.</p>
+                <input id="rename-username-input" type="text" placeholder="New username" autocomplete="off" autocapitalize="sentences" data-lpignore="true" data-1p-ignore data-bwignore="true" data-form-type="other" maxlength="40">
+                <div id="rename-error" class="modal-error"></div>
+                <div class="modal-actions">
+                    <button id="rename-save-btn" class="primary-button">Save</button>
+                    <button id="rename-cancel-btn" class="secondary-button">Cancel</button>
+                </div>
             </div>
         </div>
 

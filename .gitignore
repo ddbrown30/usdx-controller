@@ -1,4 +1,5 @@
 /.vscode
 /__pycache__
+/data
 song_list.xlsx
 export_song_list.bat
