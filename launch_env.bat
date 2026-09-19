@@ -29,6 +29,15 @@ set "USDX_BRIDGE_DIR=E:\Projects\USDX\game\plugins\controller_bridge"
 REM Activate virtual environment
 call "%VENV_PATH%\Scripts\activate.bat"
 
+REM activate.bat bakes in the absolute path the venv was created at, as
+REM VIRTUAL_ENV, and prepends "%VIRTUAL_ENV%\Scripts" to PATH. If this
+REM folder has since been moved or renamed, that path goes stale and
+REM silently fails to put this project's venv first on PATH. Force the
+REM correct, current location to the front of PATH ourselves so bare
+REM "python"/"pip"/etc. below (and in whatever a forwarded command
+REM below runs) reliably resolve to this venv.
+set "PATH=%VENV_PATH%\Scripts;%PATH%"
+
 REM If a command was supplied, run it
 if not "%~1"=="" (
 %*
