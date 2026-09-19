@@ -18,7 +18,11 @@ REM Launched with "start" (not "call") so this script doesn't block:
 REM launch_env.bat's elevation relaunch is fire-and-forget anyway, so
 REM blocking here wouldn't reliably tell us when app.py is actually up -
 REM polling the HTTP server below is what actually tells us that.
-start "USDX Controller" "%~dp0launch_env.bat" py app.py
+REM
+REM Run via pythonw (no console window) with "start /b" so
+REM launch_env.bat's elevated window can exit right away instead of
+REM sitting open for as long as the server runs.
+start "USDX Controller" "%~dp0launch_env.bat" start /b pythonw app.py
 
 echo Waiting for controller app to finish loading songs...
 
