@@ -576,38 +576,6 @@ const switchUserBtn = document.getElementById("switch-user-btn");
 
 let pendingLoginUsername = null;
 
-// Default typed usernames to an uppercase first letter, without
-// touching the rest of what's typed (so e.g. "dan" becomes "Dan" as
-// you type, but "danBrown" stays "DanBrown" past the first letter).
-// Preserves cursor position so it doesn't disrupt mid-string editing.
-function capitalizeFirstLetter(input) {
-    const value = input.value;
-
-    if (!value) {
-        return;
-    }
-
-    const capitalized = value.charAt(0).toUpperCase() + value.slice(1);
-
-    if (capitalized === value) {
-        return;
-    }
-
-    const selectionStart = input.selectionStart;
-    const selectionEnd = input.selectionEnd;
-
-    input.value = capitalized;
-    input.setSelectionRange(selectionStart, selectionEnd);
-}
-
-loginUsernameInput.addEventListener("input", () => {
-    capitalizeFirstLetter(loginUsernameInput);
-});
-
-renameUsernameInput.addEventListener("input", () => {
-    capitalizeFirstLetter(renameUsernameInput);
-});
-
 async function initUser() {
     try {
         const response = await fetch("/api/user");
