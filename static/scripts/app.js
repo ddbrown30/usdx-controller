@@ -108,6 +108,44 @@ async function searchSongs() {
     }
 }
 
+function setFavouriteButtonState(button, isFavourite) {
+    button.classList.toggle("active", isFavourite);
+    button.innerHTML = isFavourite
+        ? '<i class="fa-solid fa-heart"></i>'
+        : '<i class="fa-regular fa-heart"></i>';
+}
+
+// Updates every rendered row for this song - search and favourites
+// each render their own separate copy of a song's row, so toggling a
+// favourite in one place has to be reflected in both, not just the
+// row that was actually clicked.
+function syncFavouriteState(songId, isFavourite) {
+    const buttons = [
+        ...results.querySelectorAll(".song-favourite"),
+        ...favouritesContainer.querySelectorAll(".song-favourite"),
+    ];
+
+    for (const button of buttons) {
+        if (button.dataset.songId !== songId) {
+            continue;
+        }
+
+        setFavouriteButtonState(button, isFavourite);
+
+        if (!isFavourite) {
+            const row = button.closest(".song");
+
+            if (row && row.parentElement === favouritesContainer) {
+                row.remove();
+            }
+        }
+    }
+
+    if (!isFavourite && favouritesContainer.children.length === 0) {
+        favouritesContainer.innerHTML = '<div class="no-results">No favourites yet.</div>';
+    }
+}
+
 function buildSongRow(song) {
     const element = document.createElement("div");
     element.className = "song";
@@ -162,32 +200,24 @@ function buildSongRow(song) {
     controls.className = "song-controls";
 
     const favouriteButton = document.createElement("button");
-    favouriteButton.className = "song-button song-favourite" + (song.is_favourite ? " active" : "");
-    favouriteButton.innerHTML = song.is_favourite
-        ? '<i class="fa-solid fa-star"></i>'
-        : '<i class="fa-regular fa-star"></i>';
+    favouriteButton.className = "song-button song-favourite";
+    favouriteButton.dataset.songId = song.id;
+    setFavouriteButtonState(favouriteButton, song.is_favourite);
 
     favouriteButton.addEventListener("click", async () => {
-        const newState = !song.is_favourite;
+        // Read current state from the DOM rather than the closed-over
+        // song object: search and favourites render separate song
+        // objects for the same underlying song, and syncFavouriteState
+        // below keeps every rendered row's DOM in sync, not each
+        // row's own JS object.
+        const newState = !favouriteButton.classList.contains("active");
 
         favouriteButton.disabled = true;
 
         const success = await setFavourite(song.id, newState);
 
         if (success) {
-            song.is_favourite = newState;
-            favouriteButton.classList.toggle("active", newState);
-            favouriteButton.innerHTML = newState
-                ? '<i class="fa-solid fa-star"></i>'
-                : '<i class="fa-regular fa-star"></i>';
-
-            if (!newState && element.parentElement === favouritesContainer) {
-                element.remove();
-
-                if (favouritesContainer.children.length === 0) {
-                    favouritesContainer.innerHTML = '<div class="no-results">No favourites yet.</div>';
-                }
-            }
+            syncFavouriteState(song.id, newState);
         }
 
         favouriteButton.disabled = false;

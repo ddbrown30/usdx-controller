@@ -13,6 +13,7 @@
     --us-accent: #77bbd2;
     --us-accent-dark: #1c7eab;
     --us-gold: #ffdf1f;
+    --us-heart: #ff4d6d;
     --us-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
     --us-radius: 5px;
     --us-tap: 46px;
@@ -331,8 +332,8 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .song-favourite.active {
-    color: var(--us-gold);
-    border-color: var(--us-gold);
+    color: var(--us-heart);
+    border-color: var(--us-heart);
 }
 
 .modal-overlay {
