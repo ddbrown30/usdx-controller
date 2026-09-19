@@ -184,12 +184,16 @@ class SongDatabase:
             if duets_filter:
                 songs = sorted(
                     self.songs,
-                    key=lambda song: (song.artist, song.title),
+                    key=lambda song: (song.artist.casefold(), song.title.casefold()),
                 )
             else:
                 songs = sorted(
                     self.songs,
-                    key=lambda song: (-song.is_new, song.artist, song.title),
+                    key=lambda song: (
+                        -song.is_new,
+                        song.artist.casefold(),
+                        song.title.casefold(),
+                    ),
                 )
             return [(song, 0) for song in songs]
 
