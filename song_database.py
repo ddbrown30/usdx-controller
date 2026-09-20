@@ -71,12 +71,11 @@ class SongDatabase:
 
         new_count = sum(song.is_new for song in songs)
         if songs:
-            newest_date = songs[0].created
-            max_age = newest_date - timedelta(days=180)
+            max_age = datetime.now() - timedelta(days=180)
             for i, song in enumerate(songs):
                 if song.is_new:
                     continue
-                if new_count >= 20 or (i > 20 and song.created < max_age):
+                if new_count >= 20 or song.created < max_age:
                     break
                 song.is_new = True
                 new_count += 1
