@@ -27,6 +27,17 @@ searchInput.addEventListener("input", () => {
     searchTimer = setTimeout(searchSongs, 200);
 });
 
+// Closes the on-screen keyboard when the search/go key is pressed.
+searchInput.addEventListener("search", () => {
+    searchInput.blur();
+});
+
+searchInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        searchInput.blur();
+    }
+});
+
 searchField.addEventListener("change", () => {
     searchSongs();
 });
