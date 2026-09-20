@@ -211,14 +211,15 @@ def search():
 
     tags = {tag.casefold() for tag in tag_params if tag}
 
+    has_filters = duets_filter or new_filter or bool(decades) or bool(tags)
+
     results = song_database.search(
         query=query,
-        duets_filter=duets_filter,
-        new_filter=new_filter,
+        has_filters=has_filters,
         field=field,
     )
 
-    if duets_filter or new_filter or decades or tags:
+    if has_filters:
         results = [
             (song, score)
             for song, score in results
