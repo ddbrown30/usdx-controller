@@ -5,8 +5,16 @@ const searchStatus = document.getElementById("searchStatus");
 const clearSearchBtn = document.getElementById("clearSearch");
 const results = document.getElementById("results");
 const favouritesContainer = document.getElementById("favourites");
-const duetsFilter = document.getElementById("duetsFilter");
-const newFilter = document.getElementById("newFilter");
+
+const filterBtn = document.getElementById("filterBtn");
+const filterCount = document.getElementById("filterCount");
+const filterOverlay = document.getElementById("filter-overlay");
+const closeFiltersBtn = document.getElementById("close-filters-btn");
+const clearFiltersBtn = document.getElementById("clear-filters-btn");
+const chipDuets = document.getElementById("chip-duets");
+const chipNew = document.getElementById("chip-new");
+const decadeChips = document.getElementById("decade-chips");
+const tagChips = document.getElementById("tag-chips");
 
 let searchTimer = null;
 let currentUsername = null;
@@ -23,13 +31,47 @@ searchField.addEventListener("change", () => {
     searchSongs();
 });
 
-duetsFilter.addEventListener("change", () => {
+filterBtn.addEventListener("click", () => {
+    filterOverlay.hidden = false;
+});
+
+closeFiltersBtn.addEventListener("click", () => {
+    filterOverlay.hidden = true;
+});
+
+filterOverlay.addEventListener("click", (event) => {
+    if (event.target === filterOverlay) {
+        filterOverlay.hidden = true;
+    }
+});
+
+clearFiltersBtn.addEventListener("click", () => {
+    document.querySelectorAll(".chip.active").forEach(chip => {
+        chip.classList.remove("active");
+    });
+
+    updateFilterCount();
     searchSongs();
 });
 
-newFilter.addEventListener("change", () => {
+chipDuets.addEventListener("click", () => {
+    chipDuets.classList.toggle("active");
+    updateFilterCount();
     searchSongs();
 });
+
+chipNew.addEventListener("click", () => {
+    chipNew.classList.toggle("active");
+    updateFilterCount();
+    searchSongs();
+});
+
+function updateFilterCount() {
+    const count = document.querySelectorAll(".chip.active").length;
+
+    filterCount.textContent = count;
+    filterCount.hidden = count === 0;
+}
 
 clearSearchBtn.addEventListener("click", () => {
     searchInput.value = "";
@@ -76,8 +118,16 @@ async function searchSongs() {
         const params = new URLSearchParams({
             q: query,
             field: field,
-            duets_filter: duetsFilter.checked ? "1" : "0",
-            new_filter: newFilter.checked ? "1" : "0",
+            duets_filter: chipDuets.classList.contains("active") ? "1" : "0",
+            new_filter: chipNew.classList.contains("active") ? "1" : "0",
+        });
+
+        decadeChips.querySelectorAll(".chip.active").forEach(chip => {
+            params.append("decades", chip.dataset.decade);
+        });
+
+        tagChips.querySelectorAll(".chip.active").forEach(chip => {
+            params.append("tags", chip.dataset.tag);
         });
 
         const response = await fetch(
@@ -99,12 +149,76 @@ async function searchSongs() {
 
         searchStatus.textContent = `${songs.length} result${songs.length === 1 ? "" : "s"}`;
 
+        const fragment = document.createDocumentFragment();
+
         for (const song of songs) {
-            addSongResult(song);
+            fragment.appendChild(buildSongRow(song));
         }
+
+        results.appendChild(fragment);
     } catch (error) {
         console.error(error);
         searchStatus.textContent = "Search failed.";
+    }
+}
+
+async function loadDecades() {
+    try {
+        const response = await fetch("/api/decades");
+
+        if (!response.ok) {
+            throw new Error(`Failed to load decades (${response.status})`);
+        }
+
+        const decades = await response.json();
+
+        for (const decade of decades) {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "chip";
+            chip.dataset.decade = decade;
+            chip.textContent = `${decade}s`;
+
+            chip.addEventListener("click", () => {
+                chip.classList.toggle("active");
+                updateFilterCount();
+                searchSongs();
+            });
+
+            decadeChips.appendChild(chip);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function loadTags() {
+    try {
+        const response = await fetch("/api/tags");
+
+        if (!response.ok) {
+            throw new Error(`Failed to load tags (${response.status})`);
+        }
+
+        const tags = await response.json();
+
+        for (const tag of tags) {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "chip";
+            chip.dataset.tag = tag;
+            chip.textContent = tag;
+
+            chip.addEventListener("click", () => {
+                chip.classList.toggle("active");
+                updateFilterCount();
+                searchSongs();
+            });
+
+            tagChips.appendChild(chip);
+        }
+    } catch (error) {
+        console.error(error);
     }
 }
 
@@ -247,10 +361,6 @@ function buildSongRow(song) {
     element.appendChild(controls);
 
     return element;
-}
-
-function addSongResult(song) {
-    results.appendChild(buildSongRow(song));
 }
 
 function addFavouriteResult(song) {
@@ -1022,6 +1132,8 @@ async function loadNowPlaying() {
 
 updateClearButtonVisibility();
 initUser();
+loadDecades();
+loadTags();
 searchSongs();
 loadNowPlaying();
 setInterval(loadNowPlaying, 3000);

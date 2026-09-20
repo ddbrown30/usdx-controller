@@ -221,9 +221,70 @@ input[type="search"]::-webkit-search-cancel-button {
     font: inherit;
 }
 
-.filter-section {
+.filter-trigger-btn {
+    position: relative;
+    font-size: 16px;
+}
+
+.filter-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
+    border-radius: 8px;
+    background: var(--us-gold);
+    color: #302831;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+}
+
+.filter-modal {
+    max-width: 480px;
+}
+
+.filter-group {
+    margin-bottom: 18px;
+}
+
+.filter-group-title {
+    margin: 0 0 8px;
+    color: var(--us-muted);
+    font-size: 14px;
+}
+
+.chip-row {
     display: flex;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--us-line);
+    background: var(--us-panel-2);
+    color: var(--us-muted);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.chip:hover {
+    border-color: var(--us-accent-dark);
+    color: var(--us-text);
+}
+
+.chip.active {
+    border-color: var(--us-accent);
+    background: var(--us-accent-dark);
+    color: var(--us-text);
 }
 
 .search-status {

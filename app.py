@@ -194,11 +194,22 @@ def search():
     field = request.args.get("field", "all").lower()
     duets_filter = request.args.get("duets_filter") == "1"
     new_filter = request.args.get("new_filter") == "1"
+    decade_params = request.args.getlist("decades")
+    tag_params = request.args.getlist("tags")
 
     if field not in {"all", "title", "artist"}:
         return jsonify({
             "error": "Invalid search field."
         }), 400
+
+    try:
+        decades = {int(decade) for decade in decade_params}
+    except ValueError:
+        return jsonify({
+            "error": "Invalid decade."
+        }), 400
+
+    tags = {tag.casefold() for tag in tag_params if tag}
 
     results = song_database.search(
         query=query,
@@ -207,12 +218,14 @@ def search():
         field=field,
     )
 
-    if duets_filter or new_filter:
+    if duets_filter or new_filter or decades or tags:
         results = [
             (song, score)
             for song, score in results
             if (not duets_filter or song.is_duet)
             and (not new_filter or song.is_new)
+            and (not decades or song.decade in decades)
+            and tags <= {tag.casefold() for tag in song.tags}
         ]
 
     username = get_current_username()
@@ -230,6 +243,30 @@ def search():
         }
         for song, score in results
     ])
+
+
+@app.route("/api/decades")
+def get_decades():
+    decades = sorted({
+        song.decade
+        for song in song_database.songs
+        if song.decade is not None
+    })
+
+    return jsonify(decades)
+
+
+@app.route("/api/tags")
+def get_tags():
+    tags_by_key: dict[str, str] = {}
+
+    for song in song_database.songs:
+        for tag in song.tags:
+            tags_by_key.setdefault(tag.casefold(), tag)
+
+    tags = sorted(tags_by_key.values(), key=str.casefold)
+
+    return jsonify(tags)
 
 
 @app.route("/api/favourites")

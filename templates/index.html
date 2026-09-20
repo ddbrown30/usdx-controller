@@ -104,24 +104,50 @@
                             <option value="title">Title</option>
                             <option value="artist">Artist</option>
                         </select>
-                    </div>
 
-                    <div class="filter-section">
-                        <label class="checkbox-group">
-                            <input type="checkbox" id="duetsFilter">
-                            <img class="song-duet" src="/static/song_duet.png">Duets
-                        </label>
-
-                        <label class="checkbox-group">
-                            <input type="checkbox" id="newFilter">
-                            <i class="fa-solid fa-star song-new"></i>New
-                        </label>
+                        <button id="filterBtn" class="icon-button filter-trigger-btn" type="button" title="Filters">
+                            <i class="fa-solid fa-filter"></i>
+                            <span id="filterCount" class="filter-count" hidden>0</span>
+                        </button>
                     </div>
 
                     <div id="searchStatus" class="search-status"></div>
                 </div>
 
                 <div id="results" class="results"></div>
+            </div>
+        </div>
+
+        <div id="filter-overlay" class="modal-overlay" hidden>
+            <div class="modal filter-modal">
+                <h2>Filters</h2>
+
+                <div class="filter-group">
+                    <div class="chip-row" id="basic-filter-chips">
+                        <button type="button" class="chip" id="chip-duets">
+                            <img class="song-duet" src="/static/song_duet.png">Duets
+                        </button>
+
+                        <button type="button" class="chip" id="chip-new">
+                            <i class="fa-solid fa-star song-new"></i>New
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h3 class="filter-group-title">Decades</h3>
+                    <div class="chip-row" id="decade-chips"></div>
+                </div>
+
+                <div class="filter-group">
+                    <h3 class="filter-group-title">Tags</h3>
+                    <div class="chip-row" id="tag-chips"></div>
+                </div>
+
+                <div class="modal-actions">
+                    <button id="clear-filters-btn" class="secondary-button" type="button">Clear filters</button>
+                    <button id="close-filters-btn" class="primary-button" type="button">Done</button>
+                </div>
             </div>
         </div>
 

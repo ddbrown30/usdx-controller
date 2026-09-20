@@ -23,10 +23,16 @@ class Song:
     created: datetime
     modified: datetime
     is_new: bool = False
+    tags: tuple[str, ...] = ()
+    year: int | None = None
 
     @property
     def search_text(self) -> str:
         return f"{self.title} {self.artist}"
+
+    @property
+    def decade(self) -> int | None:
+        return (self.year // 10) * 10 if self.year is not None else None
 
 
 class SongDatabase:
@@ -112,6 +118,8 @@ class SongDatabase:
         title = None
         artist = None
         is_duet = False
+        tags: tuple[str, ...] = ()
+        year = None
 
         stat = path.stat()
         created = datetime.fromtimestamp(stat.st_ctime)
@@ -137,6 +145,18 @@ class SongDatabase:
                 elif line.upper() == "P2":
                     is_duet = True
 
+                elif line.upper().startswith("#MYTAGS:"):
+                    tags = tuple(
+                        tag.strip()
+                        for tag in line[8:].split(",")
+                        if tag.strip()
+                    )
+
+                elif line.upper().startswith("#YEAR:"):
+                    year_text = line[6:].strip()
+                    if re.fullmatch(r"\d{4}", year_text):
+                        year = int(year_text)
+
         except OSError as exc:
             print(f"Could not read {path}: {exc}")
             return None
@@ -153,6 +173,8 @@ class SongDatabase:
             created=created,
             modified=modified,
             is_new=is_new,
+            tags=tags,
+            year=year,
         )
 
     @staticmethod
